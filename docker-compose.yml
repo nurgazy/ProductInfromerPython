@@ -3,7 +3,8 @@ version: '3.8'
 services:
   fastapi_app:
     build: .
-    container_name: fastapi_container
+    image: product_informer_img:latest
+    container_name: product_informer
     ports:
       - "8000:8000"
     volumes:
