@@ -32,7 +32,6 @@ async def upload_from_1c(request: Request, x_file_name: str = Header(None)):
 async def get_json_file(filename: str):
     file_path = os.path.join(UPLOAD_DIR, filename)
 
-    # Проверяем, существует ли файл и является ли он JSON
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Файл не найден")
 
