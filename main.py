@@ -14,7 +14,10 @@ def read_root():
 
 @app.post("/upload-1c")
 async def upload_from_1c(request: Request, x_file_name: str = Header(None)):
+    print(f"Headers: {request.headers}")
+
     body_content = await request.body()
+    print(f"Received body length: {len(body_content)}")
 
     filename = x_file_name
     file_path = os.path.join(UPLOAD_DIR, filename)
