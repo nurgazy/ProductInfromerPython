@@ -1,6 +1,6 @@
 import os
 
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, Request, Header
 
 app = FastAPI()
 
@@ -12,12 +12,13 @@ def read_root():
     return {"Hello": "Hello my friend"}
 
 @app.post("/upload-1c")
-async def upload_from_1c(file: UploadFile = File(...)):
-    file_id = f"{file.filename}"
-    file_path = os.path.join(UPLOAD_DIR, file_id)
+async def upload_from_1c(request: Request, x_file_name: str = Header(None)):
+    body_content = await request.body()
+
+    filename = x_file_name
+    file_path = os.path.join(UPLOAD_DIR, filename)
 
     with open(file_path, "wb") as buffer:
-        content = await file.read()
-        buffer.write(content)
+        buffer.write(body_content)
 
-    return {"status": "saved", "file_id": file_id}
+    return {"status": "succes", "filename": filename, "size": len(body_content)}
