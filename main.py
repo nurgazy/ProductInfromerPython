@@ -12,8 +12,8 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 def read_root():
     return {"Hello": "Hello my friend"}
 
-@app.post("/upload-1c")
-async def upload_from_1c(request: Request, x_file_name: str = Header(None)):
+@app.post("/send_goods")
+async def send_goods(request: Request, x_file_name: str = Header(None)):
     print(f"Headers: {request.headers}")
 
     body_content = await request.body()
@@ -28,8 +28,8 @@ async def upload_from_1c(request: Request, x_file_name: str = Header(None)):
     return {"status": "succes", "filename": filename, "size": len(body_content)}
 
 
-@app.get("/get-json/{filename}")
-async def get_json_file(filename: str):
+@app.get("/get_goods/{filename}")
+async def get_goods(filename: str):
     file_path = os.path.join(UPLOAD_DIR, filename)
 
     if not os.path.exists(file_path):
