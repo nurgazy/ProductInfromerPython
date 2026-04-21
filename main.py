@@ -15,7 +15,7 @@ def read_root():
     return {"Hello": "Hello my friend"}
 
 @app.post("/send_goods")
-async def send_goods(data: List[Any, Any], x_file_name: str = Header(None)):
+async def send_goods(data: list[Any, Any], x_file_name: str = Header(None)):
     if not x_file_name:
         raise HTTPException(status_code=400, detail="Название файла обязателен")
 
