@@ -1,6 +1,8 @@
+import json
 import os
+from typing import Dict, Any
 
-from fastapi import FastAPI, Request, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import FileResponse
 
 app = FastAPI()
@@ -13,19 +15,27 @@ def read_root():
     return {"Hello": "Hello my friend"}
 
 @app.post("/send_goods")
-async def send_goods(request: Request, x_file_name: str = Header(None)):
-    print(f"Headers: {request.headers}")
+async def send_goods(data: Dict[Any, Any], x_file_name: str = Header(None)):
+    if not x_file_name:
+        raise HTTPException(status_code=400, detail="Название файла обязателен")
 
-    body_content = await request.body()
-    print(f"Received body length: {len(body_content)}")
+    filename = os.path.basename(x_file_name)
+    if not filename.endswith(".json"):
+        filename += ".json"
 
-    filename = x_file_name
     file_path = os.path.join(UPLOAD_DIR, filename)
 
-    with open(file_path, "wb") as buffer:
-        buffer.write(body_content)
+    # Сохраняем данные как JSON-файл
+    try:
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка при записи файла: {str(e)}")
 
-    return {"status": "succes", "filename": filename, "size": len(body_content)}
+    return {
+        "status": "success",
+        "filename": filename
+    }
 
 
 @app.get("/get_goods/{filename}")
