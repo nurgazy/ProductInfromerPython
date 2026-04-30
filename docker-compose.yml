@@ -6,7 +6,7 @@ services:
     image: product_informer_img:latest
     container_name: product_informer
     ports:
-      - "8000:8000"
+      - "80:8000"
     volumes:
       - /home/ubuntu/uploads:/app/temp_files
     environment:
