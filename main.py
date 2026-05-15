@@ -10,10 +10,6 @@ app = FastAPI()
 UPLOAD_DIR = "temp_files"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-@app.get("/")
-def read_root():
-    return {"Hello": "Hello my friend"}
-
 @app.post("/send_goods")
 async def send_goods(data: list[Any, Any], x_file_name: str = Header(None)):
     if not x_file_name:
