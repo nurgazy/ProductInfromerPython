@@ -20,6 +20,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Копируем исходный код (main.py)
 COPY . .
 
+RUN mkdir -p uploads
+
 # Открываем порт 8000
 EXPOSE 8000
 
