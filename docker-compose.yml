@@ -18,7 +18,7 @@ services:
     ports:
       - "80:8000"
     volumes:
-      - /home/ubuntu/uploads:/app/temp_files
+      - ./uploads:/app/temp_files
     environment:
       - ENV=development
       - DATABASE_URL=postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres_db:5432/${POSTGRES_DB}
