@@ -2,25 +2,9 @@ import json
 import os
 from contextlib import asynccontextmanager
 from typing import Any
-
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import FileResponse
-from sqlalchemy import create_engine, Column, Integer, String, Date
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./test.db")
-
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
-
-class Basket(Base):
-    __tablename__ = "basket"
-    id = Column(Integer, primary_key=True)
-    id_doc = Column(String(100))
-    goods_json = Column(String(5000))
-    doc_date = Column(Date, nullable=True)
+from database import Base, engine
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
