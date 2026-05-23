@@ -2,7 +2,6 @@ from sqlalchemy import Column, Integer, String, Date
 
 from database import Base
 
-
 class Basket(Base):
     __tablename__ = "basket"
     id = Column(Integer, primary_key=True)

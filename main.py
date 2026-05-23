@@ -1,10 +1,14 @@
 import json
 import os
 from contextlib import asynccontextmanager
+from datetime import date
 from typing import Any
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Depends
 from fastapi.responses import FileResponse
-from database import Base, engine
+from sqlalchemy.orm import Session
+
+from database import Base, engine, get_db
+from models import Basket
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -54,3 +58,59 @@ async def get_goods(filename: str):
         raise HTTPException(status_code=400, detail="Можно запрашивать только JSON файлы")
 
     return FileResponse(path=file_path, media_type='application/json', filename=filename)
+
+
+@app.post("/save_basket")
+async def save_basket(payload: dict[str, Any], db: Session = Depends(get_db)):
+    """
+    Принимает JSON-тело запроса, парсит метаданные и сохраняет структуру в таблицу basket.
+
+    Ожидаемый формат JSON (пример):
+    {
+        "id_doc": "12345",
+        "doc_date": "2026-05-23",
+        "goods": [{"item_id": 1, "name": "Товар 1", "price": 100}]
+    }
+    """
+    uuid_1c = payload.get("uuid1C")
+    doc_date_str = payload.get("docDate")
+    items = payload.get("items")
+
+    if not uuid_1c:
+        raise HTTPException(status_code=400, detail="Поле 'uuid_1c' обязательно для заполнения")
+
+    if items is None:
+        raise HTTPException(status_code=400, detail="Товары обязательно для заполнения")
+
+    doc_date = None
+    if doc_date_str:
+        try:
+            doc_date = date.fromisoformat(doc_date_str)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Неверный формат даты 'doc_date'. Используйте YYYY-MM-DD")
+
+    try:
+        goods_json_string = json.dumps(items, ensure_ascii=False)
+
+        if len(goods_json_string) > 5000:
+            raise HTTPException(status_code=400, detail="Список товаров превышает допустимый размер (5000 символов)")
+
+        db_basket = Basket(
+            id_doc=str(uuid_1c),
+            goods_json=goods_json_string,
+            doc_date=doc_date
+        )
+
+        db.add(db_basket)
+        db.commit()
+        db.refresh(db_basket)
+
+        return {
+            "status": "success",
+            "message": "Данные успешно сохранены",
+            "basket_id": db_basket.id
+        }
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Ошибка при работе с базой данных: {str(e)}")
