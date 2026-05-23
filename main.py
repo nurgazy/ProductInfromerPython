@@ -1,14 +1,16 @@
 import json
 import os
 from contextlib import asynccontextmanager
-from datetime import date
+from datetime import datetime
 from typing import Any
+
 from fastapi import FastAPI, Header, HTTPException, Depends
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from database import Base, engine, get_db
 from models import Basket
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -85,7 +87,7 @@ async def save_basket(payload: dict[str, Any], db: Session = Depends(get_db)):
     doc_date = None
     if doc_date_str:
         try:
-            doc_date = date.fromisoformat(doc_date_str)
+            doc_date = datetime.fromisoformat(doc_date_str)
         except ValueError:
             raise HTTPException(status_code=400, detail="Неверный формат даты 'doc_date'. Используйте YYYY-MM-DD")
 
