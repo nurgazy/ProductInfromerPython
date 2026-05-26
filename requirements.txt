@@ -43,3 +43,4 @@ websockets==16.0
 sqlalchemy==2.0.36
 alembic>=1.13.0
 psycopg[binary]==3.2.4
+sqladmin>=0.20.1
