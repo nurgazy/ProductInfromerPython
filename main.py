@@ -117,5 +117,5 @@ async def save_basket(payload: dict[str, Any], db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Ошибка при работе с базой данных: {str(e)}")
 
-
-import admin
+from admin import init_admin
+init_admin(app)
