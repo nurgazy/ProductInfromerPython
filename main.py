@@ -7,10 +7,16 @@ from typing import Any
 from fastapi import FastAPI, Header, HTTPException, Depends
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from database import Base, engine, get_db
 from models import Basket
 
+class ForceHTTPSMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        request.scope["scheme"] = "https"
+        response = await call_next(request)
+        return response
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -22,6 +28,7 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
+app.add_middleware(ForceHTTPSMiddleware)
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
