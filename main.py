@@ -94,7 +94,7 @@ async def save_basket(payload: dict[str, Any], db: Session = Depends(get_db)):
     doc_date = None
     if doc_date_str:
         try:
-            doc_date = datetime.fromisoformat(doc_date_str)
+            doc_date = datetime.strptime(doc_date_str, "%Y-%m-%d %H:%M:%S")
         except ValueError:
             raise HTTPException(status_code=400, detail="Неверный формат даты 'doc_date'. Используйте YYYY-MM-DD")
 
