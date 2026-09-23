@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 if os.getenv("ENV") == "production":
-    app.add_middleware(HTTPSRedirectMiddleware)
+    app.add_middleware(ForceHTTPSMiddleware)
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
