@@ -18,7 +18,7 @@ services:
     volumes:
       - ./uploads:/app/uploads
     environment:
-      - ENV=development
+      - ENV=${ENV:-development}
       - DATABASE_URL=postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres_db:5432/${POSTGRES_DB}
     restart: always
     depends_on:
