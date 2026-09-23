@@ -8,6 +8,7 @@ from fastapi import FastAPI, Header, HTTPException, Depends
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 from database import Base, engine, get_db
 from models import Basket
@@ -28,7 +29,8 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
-app.add_middleware(ForceHTTPSMiddleware)
+if os.getenv("ENV") == "production":
+    app.add_middleware(HTTPSRedirectMiddleware)
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -73,20 +75,13 @@ async def get_goods(filename: str):
 async def save_basket(payload: dict[str, Any], db: Session = Depends(get_db)):
     """
     Принимает JSON-тело запроса, парсит метаданные и сохраняет структуру в таблицу basket.
-
-    Ожидаемый формат JSON (пример):
-    {
-        "id_doc": "12345",
-        "doc_date": "2026-05-23",
-        "goods": [{"item_id": 1, "name": "Товар 1", "price": 100}]
-    }
     """
     uuid_1c = payload.get("uuid1C")
     doc_date_str = payload.get("docDate")
     items = payload.get("items")
 
     if not uuid_1c:
-        raise HTTPException(status_code=400, detail="Поле 'uuid_1c' обязательно для заполнения")
+        raise HTTPException(status_code=400, detail="Поле 'uuid1C' обязательно для заполнения")
 
     if items is None:
         raise HTTPException(status_code=400, detail="Товары обязательно для заполнения")
@@ -96,17 +91,17 @@ async def save_basket(payload: dict[str, Any], db: Session = Depends(get_db)):
         try:
             doc_date = datetime.strptime(doc_date_str, "%Y-%m-%d %H:%M:%S")
         except ValueError:
-            raise HTTPException(status_code=400, detail="Неверный формат даты 'doc_date'. Используйте YYYY-MM-DD")
+            raise HTTPException(
+                status_code=400,
+                detail="Неверный формат даты 'docDate'. Используйте YYYY-MM-DD HH:MM:SS"
+            )
 
     try:
-        goods_json_string = json.dumps(items, ensure_ascii=False)
-
-        if len(goods_json_string) > 5000:
-            raise HTTPException(status_code=400, detail="Список товаров превышает допустимый размер (5000 символов)")
-
+        # Передаём объект `items` (list/dict) напрямую в модель.
+        # SQLAlchemy сам преобразователь его в JSON при сохранении в базу.
         db_basket = Basket(
             id_doc=str(uuid_1c),
-            goods_json=goods_json_string,
+            goods_json=items,  # Больше не нужен json.dumps()
             doc_date=doc_date
         )
 

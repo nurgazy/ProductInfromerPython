@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.dialects.postgresql import JSONB
 
 from database import Base
 
@@ -7,7 +8,7 @@ class Basket(Base):
     __tablename__ = "basket"
     id = Column(Integer, primary_key=True)
     id_doc = Column(String(100))
-    goods_json = Column(String(5000))
+    goods_json = Column(JSONB, nullable=True)
     doc_date = Column(DateTime, nullable=True)
 
 
